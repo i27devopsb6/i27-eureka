@@ -7,6 +7,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo "Building Eureka Application"
+                sh "mvn clean package -DskipTests=true" 
             }
         }
     }
