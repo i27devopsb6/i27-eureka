@@ -12,6 +12,7 @@ pipeline {
             steps {
                 echo "Building Eureka Application"
                 sh "mvn clean package -DskipTests=true" 
+                archive 'target/*.jar'
             }
         }
     }
