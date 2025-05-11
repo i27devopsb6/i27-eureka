@@ -75,5 +75,13 @@ pipeline {
                 """
             }
         }
+        stage('Deploy to Dev') {
+            steps {
+                echo "Do execute this stage before next class"
+                echo "this stage should be deploying in dev env"
+                // expectations:
+                // i should use the new docker server ip along with port to access eureka in browset 
+            }
+        }
     }
 }
