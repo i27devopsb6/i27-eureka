@@ -24,5 +24,16 @@ pipeline {
                 sh 'mvn test'
             }
         }
+        stage('Sonar') {
+            steps {
+                sh """
+                echo "Starting Sonar Scan"
+                mvn clean verify sonar:sonar \
+                    -Dsonar.projectKey=i27-eureka \
+                    -Dsonar.host.url=http://34.45.105.80:9000 \
+                    -Dsonar.login=sqp_60dac9ef2c3bae406aabee3d228c8495566e9c9c
+                """
+            }
+        }
     }
 }
