@@ -13,6 +13,8 @@ pipeline {
         APPLICATION_NAME = "eureka"
         SONAR_URL = "http://34.45.105.80:9000"
         SONAR_TOKEN  = credentials('sonar_creds')
+        DOCKER_HUB = "docker.io/i27devopsb6"
+        DOCKER_CREDS = credentials('dockerhub_creds')
     }
     stages {
         stage('Build') {
@@ -62,6 +64,10 @@ pipeline {
                 ls -la
                 cp ${workspace}/target/i27-${env.APPLICATION_NAME}-${env.POM_VERSION}.${env.POM_PACKAGING} ./.cicd
                 ls -la ./.cicd
+                echo "**************************************** Building Docker Image ****************************************"
+                docker build --no-cache -t ${env.DOCKER_HUB}/${env.APPLICATION_NAME}:$GIT_COMMIT ./.cicd
+                echo "*** Listing Docker Images"
+                docker images
                 """
             }
         }
