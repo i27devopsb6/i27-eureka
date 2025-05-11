@@ -9,6 +9,8 @@ pipeline {
     }
     environment {
         APPLICATION_NAME = "eureka"
+        SONAR_URL = "http://34.45.105.80:9000"
+        SONAR_TOKEN  = credentials('sonar_creds')
     }
     stages {
         stage('Build') {
@@ -26,13 +28,20 @@ pipeline {
         }
         stage('Sonar') {
             steps {
-                sh """
-                echo "Starting Sonar Scan"
-                mvn clean verify sonar:sonar \
-                    -Dsonar.projectKey=i27-eureka \
-                    -Dsonar.host.url=http://34.45.105.80:9000 \
-                    -Dsonar.login=sqp_60dac9ef2c3bae406aabee3d228c8495566e9c9c
-                """
+                withSonarQubeEnv('SonarQube'){
+                    sh """
+                        echo "Starting Sonar Scan"
+                        mvn clean verify sonar:sonar \
+                            -Dsonar.projectKey=i27-eureka \
+                            -Dsonar.host.url=${env.SONAR_URL} \
+                            -Dsonar.login=${env.SONAR_TOKEN}
+                    """
+                }
+                timeout(time: 2, unit: "MINUTES") {
+                    script {
+                        waitForQualityGate  abortPipeline: true
+                    }
+                }
             }
         }
     }
