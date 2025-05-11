@@ -68,6 +68,10 @@ pipeline {
                 docker build --no-cache -t ${env.DOCKER_HUB}/${env.APPLICATION_NAME}:$GIT_COMMIT ./.cicd
                 echo "*** Listing Docker Images"
                 docker images
+                echo "**************************************** Docker Login ****************************************"
+                docker login -u ${DOCKER_CREDS_USR} -p ${DOCKER_CREDS_PSW}
+                echo "**************************************** Push Docker Image ****************************************"
+                docker push ${env.DOCKER_HUB}/${env.APPLICATION_NAME}:$GIT_COMMIT
                 """
             }
         }
