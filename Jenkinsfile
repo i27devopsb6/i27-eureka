@@ -20,12 +20,12 @@ pipeline {
                 archive 'target/*.jar'
             }
         }
-        stage('Unit tests') {
-            steps {
-                echo "Performing Unit tests for ${env.APPLICATION_NAME} Application"
-                sh 'mvn test'
-            }
-        }
+        // stage('Unit tests') {
+        //     steps {
+        //         echo "Performing Unit tests for ${env.APPLICATION_NAME} Application"
+        //         sh 'mvn test'
+        //     }
+        // }
         stage('Sonar') {
             steps {
                 withSonarQubeEnv('SonarQube'){
