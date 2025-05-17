@@ -16,6 +16,36 @@ pipeline {
         DOCKER_HUB = "docker.io/i27devopsb6"
         DOCKER_CREDS = credentials('dockerhub_creds')
     }
+    parameters {
+        choice(name: 'scanOnly',
+            choices: 'yes\nno',
+            description: 'This will scan the application'
+        )
+        choice(name: 'buildOnly',
+            choices: 'yes\nno',
+            description: 'This will only build the application'
+        )
+        choice(name: 'dockerPush',
+            choices: 'yes\nno',
+            description: 'This will trigger docker build and docker push'
+        )
+        choice(name: 'deployToDev',
+            choices: 'yes\nno',
+            description: 'This will Deploy the application to Dev env '
+        )
+        choice(name: 'deployToTest',
+            choices: 'yes\nno',
+            description: 'This will Deploy the application to Test env '
+        )
+        choice(name: 'deployToStage',
+            choices: 'yes\nno',
+            description: 'This will Deploy the application to Stage env '
+        )
+        choice(name: 'deployToProd',
+            choices: 'yes\nno',
+            description: 'This will Deploy the application to Prod env '
+        )
+    }
     stages {
         stage('Build') {
             steps {
