@@ -77,27 +77,39 @@ pipeline {
         }
         stage('Deploy to Dev') {
             steps {
-                echo "Deploying to Dev env"
-                //sshpass -pfoobar ssh -o StrictHostKeyChecking=no user@host command_to_run
-                // docker run --name cont-name imagename <process> 
-                // kubectl create deploye deployname --image nginx  
-                withCredentials([usernamePassword(credentialsId: 'john_docker_cm_creds', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
-                    script {
-                        try {
-                            // stop the container
-                            sh "sshpass -p '$PASSWORD' -v ssh -o StrictHostKeyChecking=no $USERNAME@$docker_vm_ip \"docker stop ${APPLICATION_NAME}-dev\""
-
-                            // remove the container
-                            sh "sshpass -p '$PASSWORD' -v ssh -o StrictHostKeyChecking=no $USERNAME@$docker_vm_ip \"docker rm ${APPLICATION_NAME}-dev\""
-                        }
-                        catch(err) {
-                            echo "Error caught: $err"
-                        }
-                        sh "sshpass -p '$PASSWORD' -v ssh -o StrictHostKeyChecking=no $USERNAME@$docker_vm_ip \"docker run --restart always --name ${APPLICATION_NAME}-dev -p 5761:8761 -d ${env.DOCKER_HUB}/${env.APPLICATION_NAME}:$GIT_COMMIT\""
-                    }
+                script {
+                    // dockerDeploy(env, port)
+                    dockerDeploy('dev','5761').call()
                 }
             }
         }
+        stage('Deploy to Test') {
+            steps {
+                echo "Deploying to Test env"
+            }
+        }
+    }
+}
+
+def dockerDeploy(envDeploy, port) {
+    return {
+        echo "Deploying to $envDeploy env"
+        withCredentials([usernamePassword(credentialsId: 'john_docker_cm_creds', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+            script {
+                try {
+                    // stop the container
+                    sh "sshpass -p '$PASSWORD' -v ssh -o StrictHostKeyChecking=no $USERNAME@$docker_vm_ip \"docker stop ${APPLICATION_NAME}-$envDeploy\""
+
+                    // remove the container
+                    sh "sshpass -p '$PASSWORD' -v ssh -o StrictHostKeyChecking=no $USERNAME@$docker_vm_ip \"docker rm ${APPLICATION_NAME}-$envDeploy\""
+                }
+                catch(err) {
+                    echo "Error caught: $err"
+                }
+                sh "sshpass -p '$PASSWORD' -v ssh -o StrictHostKeyChecking=no $USERNAME@$docker_vm_ip \"docker run --restart always --name ${APPLICATION_NAME}-dev -p $port:8761 -d ${env.DOCKER_HUB}/${env.APPLICATION_NAME}:$GIT_COMMIT\""
+            }
+        }
+
     }
 }
 // eureka.i27cart.com
