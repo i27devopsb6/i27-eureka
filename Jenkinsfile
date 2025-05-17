@@ -48,6 +48,14 @@ pipeline {
     }
     stages {
         stage('Build') {
+            when {
+                anyOf {
+                    expression{
+                        params.buildOnly == 'yes'
+                        params.dockerPush == 'yes'
+                    }
+                }
+            }
             steps {
                 echo "Building ${env.APPLICATION_NAME} Application"
                 sh "mvn clean package -DskipTests=true" 
@@ -61,6 +69,15 @@ pipeline {
         //     }
         // }
         stage('Sonar') {
+            when {
+                anyOf {
+                    expression{
+                        params.buildOnly == 'yes'
+                        params.dockerPush == 'yes'
+                        params.scanOnly == 'yes'
+                    }
+                }
+            }
             steps {
                 withSonarQubeEnv('SonarQube'){
                     sh """
@@ -78,17 +95,24 @@ pipeline {
                 }
             }
         }
-        stage ('Build Format') {
-            steps {
-                // Existing: i27-eureka-0.0.1-SNAPSHOT.jar
-                // Desination: i27-eureka-BUILD_NUMBER-branchName.jar
-                script {
-                    echo "Testing JAR Source: i27-${env.APPLICATION_NAME}-${env.POM_VERSION}.${env.POM_PACKAGING}"
-                    echo "Testing Jar Destination: i27-${env.APPLICATION_NAME}-${currentBuild.number}-${BRANCH_NAME}.${env.POM_PACKAGING}"
+        // stage ('Build Format') {
+        //     steps {
+        //         // Existing: i27-eureka-0.0.1-SNAPSHOT.jar
+        //         // Desination: i27-eureka-BUILD_NUMBER-branchName.jar
+        //         script {
+        //             echo "Testing JAR Source: i27-${env.APPLICATION_NAME}-${env.POM_VERSION}.${env.POM_PACKAGING}"
+        //             echo "Testing Jar Destination: i27-${env.APPLICATION_NAME}-${currentBuild.number}-${BRANCH_NAME}.${env.POM_PACKAGING}"
+        //         }
+        //     }
+        // }
+        stage ('Docker Build and Push') {
+            when {
+                anyOf {
+                    expression{
+                        params.dockerPush == 'yes'
+                    }
                 }
             }
-        }
-        stage ('Docker Build') {
             steps {
                 sh """
                 ls -la
@@ -106,6 +130,13 @@ pipeline {
             }
         }
         stage('Deploy to Dev') {
+            when {
+                anyOf {
+                    expression{
+                        params.deployToDev == 'yes'
+                    }
+                }
+            }
             steps {
                 script {
                     // dockerDeploy(env, port)
@@ -114,6 +145,13 @@ pipeline {
             }
         }
         stage('Deploy to Test') {
+            when {
+                anyOf {
+                    expression{
+                        params.deployToTest == 'yes'
+                    }
+                }
+            }
             steps {
                 script {
                     echo "Deploying to Test env"
@@ -122,6 +160,13 @@ pipeline {
             }
         }
         stage('Deploy to Stage') {
+            when {
+                anyOf {
+                    expression{
+                        params.deployToStage == 'yes'
+                    }
+                }
+            }
             steps {
                 script {
                     echo "Deploying to stg env"
@@ -130,6 +175,13 @@ pipeline {
             }
         }
         stage('Deploy to prod') {
+            when {
+                anyOf {
+                    expression{
+                        params.deployToProd == 'yes'
+                    }
+                }
+            }
             steps {
                 script {
                     echo "Deploying to prod env"
