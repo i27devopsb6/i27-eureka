@@ -166,12 +166,10 @@ pipeline {
                         expression {
                             params.deployToStage == 'yes'
                         }
-                }
+                    }
                     anyOf {
-                        expression{
                             branch 'release/*'
                             tag pattern: "v\\d{1,2}\\.\\d{1,2}\\.\\d{1,2}", comparator: "REGEXP"
-                        }
                     }
                 }
 
