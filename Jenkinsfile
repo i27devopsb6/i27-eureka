@@ -79,12 +79,21 @@ pipeline {
             steps {
                 echo "Deploying to Dev env"
                 //sshpass -pfoobar ssh -o StrictHostKeyChecking=no user@host command_to_run
+                // docker run --name cont-name imagename <process> 
+                // kubectl create deploye deployname --image nginx  
                 withCredentials([usernamePassword(credentialsId: 'john_docker_cm_creds', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
                     script {
-                        sh "sshpass -p '$PASSWORD' -v ssh -o StrictHostKeyChecking=no $USERNAME@$docker_vm_ip \"docker pull nginx\""
+                        sh "sshpass -p '$PASSWORD' -v ssh -o StrictHostKeyChecking=no $USERNAME@$docker_vm_ip \"docker run --restart always --name ${APPLICATION_NAME}-dev -p 5761:8761 ${env.DOCKER_HUB}/${env.APPLICATION_NAME}:$GIT_COMMIT\""
                     }
                 }
             }
         }
     }
 }
+// eureka.i27cart.com
+// dev env : hostport: 5761
+// test env: hostport: 6761
+// stage env: hostport: 7761
+// prod: 8761
+
+// for all the above container port is 8761
