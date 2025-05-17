@@ -77,10 +77,13 @@ pipeline {
         }
         stage('Deploy to Dev') {
             steps {
-                echo "Do execute this stage before next class"
-                echo "this stage should be deploying in dev env"
-                // expectations:
-                // i should use the new docker server ip along with port to access eureka in browset 
+                echo "Deploying to Dev env"
+                //sshpass -pfoobar ssh -o StrictHostKeyChecking=no user@host command_to_run
+                withCredentials([usernamePassword(credentialsId: 'john_docker_cm_creds', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+                    script {
+                        sh "sshpass -p '$PASSWORD' -v ssh -o StrictHostKeyChecking=no $USERNAME@$docker_vm_ip \"docker pull nginx\""
+                    }
+                }
             }
         }
     }
