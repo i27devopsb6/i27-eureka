@@ -85,20 +85,26 @@ pipeline {
         }
         stage('Deploy to Test') {
             steps {
-                echo "Deploying to Test env"
-                dockerDeploy('tst','6761').call()
+                script {
+                    echo "Deploying to Test env"
+                    dockerDeploy('tst','6761').call()
+                }
             }
         }
         stage('Deploy to Stage') {
             steps {
-                echo "Deploying to stg env"
-                dockerDeploy('stg','7761').call()
+                script {
+                    echo "Deploying to stg env"
+                    dockerDeploy('stg','7761').call()
+                }
             }
         }
         stage('Deploy to prod') {
             steps {
-                echo "Deploying to prod env"
-                dockerDeploy('prd','8761').call()
+                script {
+                    echo "Deploying to prod env"
+                    dockerDeploy('prd','8761').call()
+                }
             }
         }
     }
