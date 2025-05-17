@@ -161,17 +161,20 @@ pipeline {
         }
         stage('Deploy to Stage') {
             when {
-                anyOf {
-                    expression{
-                        params.deployToStage == 'yes'
+                allOf {
+                    anyOf {
+                        expression {
+                            params.deployToStage == 'yes'
+                        }
+                }
+                    anyOf {
+                        expression{
+                            branch 'release/*'
+                            tag pattern: "v\\d{1,2}\\.\\d{1,2}\\.\\d{1,2}", comparator: "REGEXP"
+                        }
                     }
                 }
-                anyOf {
-                    expression{
-                        branch 'release/*'
-                        tag pattern: "v\\d{1,2}\\.\\d{1,2}\\.\\d{1,2}", comparator: "REGEXP"
-                    }
-                }
+
             }
             steps {
                 script {
