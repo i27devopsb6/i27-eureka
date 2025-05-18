@@ -71,11 +71,9 @@ pipeline {
         stage('Sonar') {
             when {
                 anyOf {
-                    expression{
-                        params.buildOnly == 'yes'
-                        params.dockerPush == 'yes'
-                        params.scanOnly == 'yes'
-                    }
+                    expression { params.buildOnly == 'yes' }
+                    expression { params.dockerPush == 'yes' }
+                    expression { params.scanOnly == 'yes' }
                 }
             }
             steps {
