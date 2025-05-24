@@ -187,7 +187,7 @@ pipeline {
             }
             steps {
                 timeout(time: 300, unit: 'SECONDS') { // 300 seconds
-                     input mesage: "Deploying ${env.APPLICATION_NAME} to production ?", ok: 'yes', submitter: 'ramsre,i27academy'
+                     input message: "Deploying ${env.APPLICATION_NAME} to production ?", ok: 'yes', submitter: 'ramsre,i27academy'
                 }
                 script {
                     echo "Deploying to prod env"
