@@ -45,6 +45,7 @@ pipeline {
             choices: 'no\nyes',
             description: 'This will Deploy the application to Prod env '
         )
+        //string(name: 'CHANGE_TICKET', defaultValue: 'ENTER_CHANGE_TICKET', description: '')
     }
     stages {
         stage('Build') {
@@ -185,6 +186,9 @@ pipeline {
                 }
             }
             steps {
+                timeout(time: 300, unit: 'SECONDS') { // 300 seconds
+                     input mesage: "Deploying ${env.APPLICATION_NAME} to production ?", ok: 'yes', submitter: 'ramsre,i27academy'
+                }
                 script {
                     echo "Deploying to prod env"
                     dockerDeploy('prd','8761').call()
