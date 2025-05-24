@@ -57,9 +57,10 @@ pipeline {
                 }
             }
             steps {
-                echo "Building ${env.APPLICATION_NAME} Application"
-                sh "mvn clean package -DskipTests=true" 
-                archive 'target/*.jar'
+                script {
+                    buildApp().call()
+                }
+
             }
         }
         // stage('Unit tests') {
@@ -112,19 +113,9 @@ pipeline {
                 }
             }
             steps {
-                sh """
-                ls -la
-                cp ${workspace}/target/i27-${env.APPLICATION_NAME}-${env.POM_VERSION}.${env.POM_PACKAGING} ./.cicd
-                ls -la ./.cicd
-                echo "**************************************** Building Docker Image ****************************************"
-                docker build --no-cache --build-arg JAR_SOURCE=i27-${env.APPLICATION_NAME}-${env.POM_VERSION}.${env.POM_PACKAGING} -t ${env.DOCKER_HUB}/${env.APPLICATION_NAME}:$GIT_COMMIT ./.cicd
-                echo "*** Listing Docker Images"
-                docker images
-                echo "**************************************** Docker Login ****************************************"
-                docker login -u ${DOCKER_CREDS_USR} -p ${DOCKER_CREDS_PSW}
-                echo "**************************************** Push Docker Image ****************************************"
-                docker push ${env.DOCKER_HUB}/${env.APPLICATION_NAME}:$GIT_COMMIT
-                """
+                script {
+                    dockerBuildAndPush().call()
+                }
             }
         }
         stage('Deploy to Dev') {
@@ -137,6 +128,7 @@ pipeline {
             }
             steps {
                 script {
+                    imageValidation().call()
                     // dockerDeploy(env, port)
                     dockerDeploy('dev','5761').call()
                 }
@@ -152,6 +144,7 @@ pipeline {
             }
             steps {
                 script {
+                    imageValidation().call()
                     echo "Deploying to Test env"
                     dockerDeploy('tst','6761').call()
                 }
@@ -174,6 +167,7 @@ pipeline {
             }
             steps {
                 script {
+                    imageValidation().call()
                     echo "Deploying to stg env"
                     dockerDeploy('stg','7761').call()
                 }
@@ -197,6 +191,41 @@ pipeline {
                 }
             }
         }
+    }
+}
+
+def buildApp() {
+    return{
+        echo "Building ${env.APPLICATION_NAME} Application"
+         sh "mvn clean package -DskipTests=true" 
+    }
+}
+
+def imageValidation() {
+    return {
+        println("******************** Attempt to pull the docker image *********************")
+        try {
+            sh "docker pull ${env.DOCKER_HUB}/${env.APPLICATION_NAME}:$GIT_COMMIT"
+            println("********************** Image is pulled Succesfully *****************************")
+        }
+        catch(Exception e) {
+            println("***************** OOPS , the docker image is not available....... So creating the image")
+            buildApp().call()
+            dockerBuildAndPush().call()
+        }
+    }
+}
+
+
+def dockerBuildAndPush() {
+    return {
+        echo "**************************************** Building Docker Image ****************************************"
+        cp ${workspace}/target/i27-${env.APPLICATION_NAME}-${env.POM_VERSION}.${env.POM_PACKAGING} ./.cicd
+        sh "docker build --no-cache --build-arg JAR_SOURCE=i27-${env.APPLICATION_NAME}-${env.POM_VERSION}.${env.POM_PACKAGING} -t ${env.DOCKER_HUB}/${env.APPLICATION_NAME}:$GIT_COMMIT ./.cicd"
+        echo "**************************************** Docker Login ****************************************"
+        sh "docker login -u ${DOCKER_CREDS_USR} -p ${DOCKER_CREDS_PSW}"
+        echo "**************************************** Push Docker Image ****************************************"
+        sh "docker push ${env.DOCKER_HUB}/${env.APPLICATION_NAME}:$GIT_COMMIT"
     }
 }
 
