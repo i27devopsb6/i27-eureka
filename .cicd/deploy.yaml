@@ -1,0 +1,33 @@
+# Deployment file 
+apiVersion: apps/v1
+kind: Deployment 
+metadata:
+  name: i27-eureka-dev
+#  namespace: cart-dev-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+        app: i27-eureka-dev
+  template:
+    metadata:
+      labels:
+        app: i27-eureka-dev
+    spec:
+      containers:
+      - name: i27-eureka-dev
+        image: DIT # this image along with tag will be replaced dynamically from shared lib
+--- 
+apiVersion: v1
+kind: Service 
+metadata:
+  name: i27-eureka-dev
+  labels:
+    app: i27-eureka-dev
+spec:
+  type: NodePort
+  ports:
+  - port: 80 # this is port on which service is running
+    targetPort: 8761 # port where container is running
+  selector:
+    app: i27-eureka-dev
