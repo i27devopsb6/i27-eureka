@@ -5,3 +5,5 @@ image:
   name: devopsb6.jfrog.io/cart-docker-docker/eureka
   tag: random
 targetPort: 8761
+service:
+  type: ClusterIP
