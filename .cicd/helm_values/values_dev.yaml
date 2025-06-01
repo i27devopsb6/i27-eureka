@@ -2,6 +2,6 @@ fullname: i27-eureka
 replicas:
   default: 1
 image: 
-  name: docker.io/i27devopsb6/eureka
+  name: devopsb6.jfrog.io/cart-docker-docker/eureka
   tag: random
 targetPort: 8761
